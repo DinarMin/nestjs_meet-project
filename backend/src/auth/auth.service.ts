@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { User } from 'src/users/entities/entity.user';
 import { UsersService } from 'src/users/users.service';
@@ -26,6 +30,29 @@ export class AuthService {
   }
 
   async singIn(userDto: LoginUserDto) {
-    
+    const user = await this.userService.findOneByEmail(userDto.email);
+
+    return {
+      message: 'Здесь должно быть ACCESS and REFRESH tokens',
+    };
+  }
+
+  async validateUser(userDto: LoginUserDto) {
+    const user = await this.userService.findOneByEmail(userDto.email);
+
+    if (!user) {
+      throw new NotFoundException('Пользователь не существует!');
+    }
+
+    const passwordEquals = await bcrypt.compare(
+      userDto.password,
+      user.password,
+    );
+
+    if (passwordEquals) return user;
+
+    throw new UnauthorizedException({
+      message: 'Не правильный логин или пароль!',
+    });
   }
 }
