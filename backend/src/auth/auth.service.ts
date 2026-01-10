@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import {
   Injectable,
   NotFoundException,
@@ -78,5 +80,25 @@ export class AuthService {
     const tokens = { accessToken, refreshToken };
 
     return tokens;
+  }
+
+  verifyRefreshToken(refreshToken: string) {
+    const payload = this.jwtService.verify(refreshToken, {
+      secret: this.configService.getOrThrow('JWT_REFRESH_SECRET'),
+    });
+
+    return payload;
+  }
+
+  async updateAccessToken(refreshToken: string) {
+    try {
+      const userId = this.verifyRefreshToken(refreshToken);
+
+      const tokens = await this.genereatedTokens(userId);
+
+      return tokens.accessToken;
+    } catch (e) {
+      return null;
+    }
   }
 }

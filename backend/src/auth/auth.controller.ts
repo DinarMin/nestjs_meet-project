@@ -1,4 +1,13 @@
-import { Body, Controller, Post, Res, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  Res,
+  Req,
+  UseGuards,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LocalAuthGuard } from './guards/local-auth-guard';
@@ -23,5 +32,18 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     return { accessToken: tokens.accessToken };
+  }
+
+  @Post('update')
+  async updateTokens(@Req() req: Request) {
+    const refreshToken: string = req.cookies.refreshToken;
+    const accessToken: string | null =
+      await this.authService.updateAccessToken(refreshToken);
+
+    if (!accessToken) {
+      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    return { accessToken };
   }
 }
