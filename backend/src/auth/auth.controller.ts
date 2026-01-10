@@ -1,8 +1,8 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Res, Req, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { LoginUserDto } from 'src/users/dto/login-user.dto';
-import { AuthGuard } from '@nestjs/passport';
+import { LocalAuthGuard } from './guards/local-auth-guard';
+import type { Request, Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -14,11 +14,14 @@ export class AuthController {
     return user;
   }
 
-  @UseGuards(AuthGuard('local'))
   @Post('signin')
-  async signIn(@Body() userDto: LoginUserDto) {
-    const user = await this.authService.singIn(userDto);
-    console.log(user);
-    return user;
+  @UseGuards(LocalAuthGuard)
+  async signIn(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const tokens = await this.authService.singIn(req.user!);
+    res.cookie('refreshToken', tokens.refreshToken, {
+      httpOnly: true,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    return { accessToken: tokens.accessToken };
   }
 }

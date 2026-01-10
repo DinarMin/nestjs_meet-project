@@ -8,10 +8,16 @@ import { User } from 'src/users/entities/entity.user';
 import { UsersService } from 'src/users/users.service';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from 'src/users/dto/login-user.dto';
+import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UsersService) {}
+  constructor(
+    private readonly userService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async signUp(userDto: CreateUserDto) {
     const candidate = await this.userService.findOneByEmail(userDto.email);
@@ -29,12 +35,12 @@ export class AuthService {
     };
   }
 
-  async singIn(userDto: LoginUserDto) {
-    const user = await this.userService.findOneByEmail(userDto.email);
+  async singIn(userData) {
+    // const user = await this.userService.findOneByEmail();
 
-    return {
-      message: 'Здесь должно быть ACCESS and REFRESH tokens',
-    };
+    const tokens = await this.genereatedTokens(userData);
+
+    return tokens;
   }
 
   async validateUser(userDto: LoginUserDto) {
@@ -54,5 +60,23 @@ export class AuthService {
     throw new UnauthorizedException({
       message: 'Не правильный логин или пароль!',
     });
+  }
+
+  private async genereatedTokens(id: string) {
+    const payload = { id };
+
+    const accessToken = this.jwtService.sign(payload, {
+      secret: this.configService.getOrThrow('JWT_ACCESS_SECRET'),
+      expiresIn: this.configService.getOrThrow('JWT_ACCESS_EXPIRE'),
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.getOrThrow('JWT_REFRESH_SECRET'),
+      expiresIn: this.configService.getOrThrow('JWT_REFRESH_EXPIRE'),
+    });
+
+    const tokens = { accessToken, refreshToken };
+
+    return tokens;
   }
 }
