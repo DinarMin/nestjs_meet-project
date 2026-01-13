@@ -23,4 +23,8 @@ export class UsersService {
 
     return user;
   }
+
+  async clearUserTable() {
+    await this.userRepository.clear();
+  }
 }

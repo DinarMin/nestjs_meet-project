@@ -8,11 +8,12 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
-import { LocalAuthGuard } from './guards/local-auth-guard';
 import type { Request, Response } from 'express';
-import type { LoginUser } from 'src/users/interfaces/login-user.type';
+
+import { AuthService } from './auth.service';
+import { CreateUserDto } from '../users/dto/create-user.dto';
+import { LocalAuthGuard } from './guards/local-auth-guard';
+import type { LoginUser } from '../users/interfaces/login-user.type';
 
 @Controller('auth')
 export class AuthController {
