@@ -12,6 +12,7 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { LocalAuthGuard } from './guards/local-auth-guard';
 import type { Request, Response } from 'express';
+import type { LoginUser } from 'src/users/interfaces/login-user.type';
 
 @Controller('auth')
 export class AuthController {
@@ -20,13 +21,23 @@ export class AuthController {
   @Post('signup')
   async signUp(@Body() userDto: CreateUserDto) {
     const user = await this.authService.signUp(userDto);
+
+    if (!user) {
+      throw new HttpException(
+        'Пользователь с таким email уже зарегистрирован!',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     return user;
   }
 
   @Post('signin')
   @UseGuards(LocalAuthGuard)
-  async signIn(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    const tokens = await this.authService.singIn(req.user!);
+  async signIn(
+    @Req() req: Request & { user: LoginUser },
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const tokens = await this.authService.singIn(req.user);
     res.cookie('refreshToken', tokens.refreshToken, {
       httpOnly: true,
       maxAge: 7 * 24 * 60 * 60 * 1000,

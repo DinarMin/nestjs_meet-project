@@ -12,6 +12,7 @@ import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from 'src/users/dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { LoginUser } from 'src/users/interfaces/login-user.type';
 
 @Injectable()
 export class AuthService {
@@ -37,10 +38,8 @@ export class AuthService {
     };
   }
 
-  async singIn(userData) {
-    // const user = await this.userService.findOneByEmail();
-
-    const tokens = await this.genereatedTokens(userData);
+  async singIn(userData: LoginUser) {
+    const tokens = await this.genereatedTokens(userData.id);
 
     return tokens;
   }
@@ -49,7 +48,7 @@ export class AuthService {
     const user = await this.userService.findOneByEmail(userDto.email);
 
     if (!user) {
-      throw new NotFoundException('Пользователь не существует!');
+      throw new NotFoundException('Неверный логин или пароль');
     }
 
     const passwordEquals = await bcrypt.compare(
@@ -57,11 +56,13 @@ export class AuthService {
       user.password,
     );
 
-    if (passwordEquals) return user;
+    if (!passwordEquals) {
+      throw new UnauthorizedException({
+        message: 'Неверный логин или пароль!',
+      });
+    }
 
-    throw new UnauthorizedException({
-      message: 'Не правильный логин или пароль!',
-    });
+    return user;
   }
 
   private async genereatedTokens(id: string) {
