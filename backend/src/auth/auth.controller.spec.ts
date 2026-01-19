@@ -8,6 +8,7 @@ describe('AuthController', () => {
   let app: INestApplication;
   let usersService: UsersService;
 
+  /* Тестовые данные */
   const data = {
     username: 'test',
     email: 'testjest5@gmail.com',
@@ -23,6 +24,7 @@ describe('AuthController', () => {
     app.init();
 
     usersService = module.get<UsersService>(UsersService);
+    /* Очищаем таблицу */
     await usersService.clearUserTable();
   });
 

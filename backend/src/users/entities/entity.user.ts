@@ -3,8 +3,12 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   CreateDateColumn,
+  OneToMany,
 } from 'typeorm';
 
+import { Participant } from 'src/rooms/entities/enity.participant';
+import { Messages } from 'src/chat/entities/enity.messages';
+import { Calls } from 'src/calls/entities/enity.calls';
 @Entity()
 export class User {
   @PrimaryGeneratedColumn('uuid')
@@ -21,4 +25,13 @@ export class User {
 
   @CreateDateColumn()
   createdAt: Date;
+
+  @OneToMany(() => Participant, (participant) => participant.user)
+  participants: Participant[];
+
+  @OneToMany(() => Messages, (messages) => messages.user)
+  messages: Messages[];
+
+  @OneToMany(() => Calls, (calls) => calls.user)
+  calls: Calls[];
 }

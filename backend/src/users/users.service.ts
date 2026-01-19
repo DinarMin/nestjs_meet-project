@@ -12,18 +12,21 @@ export class UsersService {
     @InjectRepository(User) private readonly userRepository: Repository<User>,
   ) {}
 
+  /* Сохранение нового юзера */
   async create(createUserDto: CreateUserDto) {
     const user = this.userRepository.create({ ...createUserDto });
 
     return this.userRepository.save(user);
   }
 
+  /* Поиск юзера по email */
   async findOneByEmail(email: string) {
     const user = await this.userRepository.findOne({ where: { email } });
 
     return user;
   }
 
+  /* Очишение всей таблицы User, использовать только в dev режиме и только при тестах! */
   async clearUserTable() {
     await this.userRepository.clear();
   }
