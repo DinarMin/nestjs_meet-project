@@ -1,11 +1,8 @@
 import {
-  ConnectedSocket,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  MessageBody,
 } from '@nestjs/websockets';
 import { ChatService } from './chat.service';
 import { Server, Socket } from 'socket.io';
@@ -26,24 +23,5 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: Socket) {
     console.log('User disconnected', client.id);
-  }
-
-  @SubscribeMessage('join-room')
-  handleJoinRoom(
-    @MessageBody() data: { roomId: string },
-    @ConnectedSocket() client: Socket,
-  ) {
-    client.join(data.roomId);
-  }
-
-  @SubscribeMessage('room-message')
-  handleRoomMessage(
-    @MessageBody() data: { roomId: string; message: string },
-    @ConnectedSocket() client: Socket,
-  ) {
-    client.to(data.roomId).emit('room-message', {
-      message: data.message,
-      from: client.id,
-    });
   }
 }

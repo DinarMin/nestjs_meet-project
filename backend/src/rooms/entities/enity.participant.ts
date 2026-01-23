@@ -34,6 +34,6 @@ export class Participant {
   })
   role: RoleType;
 
-  @Column('int')
+  @Column({ type: 'int', nullable: true })
   lastReadMessageId: number;
 }

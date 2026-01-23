@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -29,5 +29,17 @@ export class UsersService {
   /* Очишение всей таблицы User, использовать только в dev режиме и только при тестах! */
   async clearUserTable() {
     await this.userRepository.clear();
+  }
+
+  async findOne(id: string) {
+    const user = await this.userRepository.findOne({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException(`There is no user under id ${id}`);
+    }
+
+    return user;
   }
 }
