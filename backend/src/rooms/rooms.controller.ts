@@ -14,7 +14,7 @@ export class RoomsController {
   async create(@Req() { user }: Request, @Body() roomDto: CreateRoomsDto) {
     const userId = (user as User).id;
     const { memberId } = roomDto;
-    const room = await this.roomsService.create(roomDto, userId, memberId);
+    const room = await this.roomsService.createPrivate(roomDto, userId, memberId);
     return room;
   }
 }

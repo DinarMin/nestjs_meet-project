@@ -13,7 +13,7 @@ export class RoomsService {
     private dataSource: DataSource,
   ) {}
 
-  async create(RoomDto: CreateRoomsDto, userId, memberId) {
+  async createPrivate(RoomDto: CreateRoomsDto, userId, memberId) {
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
